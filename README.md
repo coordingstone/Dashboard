@@ -29,9 +29,7 @@ Enter the docker container. In ``/var/www/html/migrations``, run migrations:
 
     $ php initDb.php
     
-### Optional
-    
-Import ``migrations/sql/test/testdata.sql`` to populate the DB.
+This will also populate the db with testdata
 
 ## Tests
 
