@@ -3,6 +3,7 @@
 use Dashboard\Datamodels\CustomerCountPerDay;
 use Dashboard\Datamodels\OrderCountPerDay;
 use Dashboard\Datamodels\RevenuePerDay;
+use Dashboard\Response\StatisticsPerDayResponse;
 use Dashboard\Response\StatisticsResponse;
 use Dashboard\Service\StatisticsService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -45,9 +46,13 @@ class StatisticsServiceTest extends AbstractTest
         $customerCountPerDay = CustomerCountPerDay::withDbRow(["purchase_date" => "2021-01-01",  "customer_count" => 2]);
         $orderCountPerDay = OrderCountPerDay::withDbRow(["purchase_date" => "2021-01-01",  "order_count" => 2]);
 
-        $expectedResponse = StatisticsResponse::createModel($orderCountPerDay);
-        $expectedResponse->totalRevenue = $revenuePerDay->totalRevenue;
-        $expectedResponse->customerCount = $customerCountPerDay->customerCount;
+        $statisticsPerDayResponse = StatisticsPerDayResponse::createModel($orderCountPerDay);
+        $statisticsPerDayResponse->totalRevenue = $revenuePerDay->totalRevenue;
+        $statisticsPerDayResponse->customerCount = $customerCountPerDay->customerCount;
+
+        $expectedResponse = StatisticsResponse::createModel($customerCountPerDay->customerCount, $orderCountPerDay->orderCount, $revenuePerDay->totalRevenue, array($statisticsPerDayResponse));
+
+
 
         $this->orderItemDaoMock->method('getTotalRevenueCountPerDayBetweenDates')->willReturn(array($revenuePerDay));
         $this->orderItemDaoMock->expects($this->once())
@@ -67,9 +72,8 @@ class StatisticsServiceTest extends AbstractTest
         $result = $this->statisticsService->getStatisticsBetweenDates("2019-01-01", "2020-01-01");
 
 
-        $this->assertIsArray($result);
-        $this->assertEquals(array($expectedResponse), $result);
-        $this->assertEquals(count($result), 1);
+        $this->assertEquals($expectedResponse, $result);
+        $this->assertEquals(count($expectedResponse->statisticsPerDayResponses), 1);
     }
 
     /**
@@ -78,6 +82,8 @@ class StatisticsServiceTest extends AbstractTest
      */
     public function testGetStatisticsBetweenDatesNoResult()
     {
+        $expectedResponse = StatisticsResponse::createModel(0,0,0.0, array());
+
         $this->orderItemDaoMock->method('getTotalRevenueCountPerDayBetweenDates')->willReturn(array());
         $this->orderItemDaoMock->expects($this->once())
             ->method('getTotalRevenueCountPerDayBetweenDates')
@@ -95,7 +101,7 @@ class StatisticsServiceTest extends AbstractTest
 
         $result = $this->statisticsService->getStatisticsBetweenDates("2019-01-01", "2020-01-01");
 
-        $this->assertEquals(array(), $result);
+        $this->assertEquals($expectedResponse, $result);
     }
 
     /**
@@ -122,15 +128,24 @@ class StatisticsServiceTest extends AbstractTest
             OrderCountPerDay::withDbRow(["purchase_date" => "2021-01-03",  "order_count" => 8])
         );
 
-        $expectedResponse = array();
+        $statisticsPerDayResponses = array();
+        $totalCustomerCount = 0;
+        $totalOrderCount = 0;
+        $totalRevenue = 0;
 
         for ($i = 0; $i < count($orderCountsPerDay); $i++) {
-            $statisticsResponse = StatisticsResponse::createModel($orderCountsPerDay[$i]);
+            $statisticsResponse = StatisticsPerDayResponse::createModel($orderCountsPerDay[$i]);
             $statisticsResponse->totalRevenue = $revenuesPerDay[$i]->totalRevenue;
             $statisticsResponse->customerCount = $customerCountsPerDay[$i]->customerCount;
 
-            $expectedResponse[] = $statisticsResponse;
+            $totalOrderCount += $orderCountsPerDay[$i]->orderCount;
+            $totalCustomerCount += $customerCountsPerDay[$i]->customerCount;
+            $totalRevenue += $revenuesPerDay[$i]->totalRevenue;
+
+            $statisticsPerDayResponses[] = $statisticsResponse;
         }
+
+        $expectedResponse = StatisticsResponse::createModel($totalCustomerCount, $totalOrderCount, $totalRevenue, $statisticsPerDayResponses);
 
 
         $this->orderItemDaoMock->method('getTotalRevenueCountPerDayBetweenDates')->willReturn($revenuesPerDay);
@@ -150,9 +165,8 @@ class StatisticsServiceTest extends AbstractTest
 
         $result = $this->statisticsService->getStatisticsBetweenDates("2019-01-01", "2020-01-01");
 
-        $this->assertIsArray($result);
         $this->assertEquals($expectedResponse, $result);
-        $this->assertEquals(count($result), 3);
+        $this->assertEquals(count($result->statisticsPerDayResponses), 3);
     }
 
     /**
@@ -173,14 +187,22 @@ class StatisticsServiceTest extends AbstractTest
             OrderCountPerDay::withDbRow(["purchase_date" => "2021-01-03",  "order_count" => 8])
         );
 
-        $expectedResponse = array();
+        $statisticsPerDayResponses = array();
+        $totalCountCustomers = 0;
+        $totalOrderCount = 0;
+        $totalRevenue = 0;
 
         for ($i = 0; $i < count($orderCountsPerDay); $i++) {
-            $statisticsResponse = StatisticsResponse::createModel($orderCountsPerDay[$i]);
+            $statisticsResponse = StatisticsPerDayResponse::createModel($orderCountsPerDay[$i]);
             $statisticsResponse->customerCount = $customerCountsPerDay[$i]->customerCount;
 
-            $expectedResponse[] = $statisticsResponse;
+            $totalOrderCount += $orderCountsPerDay[$i]->orderCount;
+            $totalCountCustomers += $customerCountsPerDay[$i]->customerCount;
+
+            $statisticsPerDayResponses[] = $statisticsResponse;
         }
+
+        $expectedResponse = StatisticsResponse::createModel($totalCountCustomers, $totalOrderCount, $totalRevenue, $statisticsPerDayResponses);
 
         $this->orderItemDaoMock->method('getTotalRevenueCountPerDayBetweenDates')->willReturn(array());
         $this->orderItemDaoMock->expects($this->once())
@@ -199,9 +221,7 @@ class StatisticsServiceTest extends AbstractTest
 
         $result = $this->statisticsService->getStatisticsBetweenDates("2019-01-01", "2020-01-01");
 
-
-        $this->assertIsArray($result);
         $this->assertEquals($expectedResponse, $result);
-        $this->assertEquals(count($result), 3);
+        $this->assertEquals(count($result->statisticsPerDayResponses), 3);
     }
 }

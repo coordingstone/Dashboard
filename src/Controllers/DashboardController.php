@@ -17,10 +17,10 @@ class DashboardController extends AbstractController
     /**
      * @param string $fromDate
      * @param string $toDate
-     * @return array
+     * @return array|object
      * @throws \Exception
      */
-    public function getStatisticsBetweenDates(string $fromDate, string $toDate): array
+    public function getStatisticsBetweenDates(string $fromDate, string $toDate)
     {
 
         $fromDate = filter_var($fromDate, FILTER_SANITIZE_STRING);
@@ -29,7 +29,7 @@ class DashboardController extends AbstractController
         $errorMessage = $this->validateDates($fromDate, $toDate);
         if (!empty($errorMessage)) {
             $error = array("errorMessage" => $errorMessage);
-            return $this->generateResponse(400, $error);
+            return $this->generateError(400, $error);
         }
 
         $data = $this->statisticsService->getStatisticsBetweenDates($fromDate, $toDate);

@@ -2,10 +2,12 @@
 
 use Dashboard\Controllers\DashboardController;
 use Dashboard\Datamodels\OrderCountPerDay;
+use Dashboard\Response\StatisticsPerDayResponse;
 use Dashboard\Response\StatisticsResponse;
 use Dashboard\Service\StatisticsService;
 
-class DashboardControllerTest extends AbstractTest {
+class DashboardControllerTest extends AbstractTest
+{
 
     /** @var StatisticsService  */
     private StatisticsService $statisticsService;
@@ -34,31 +36,33 @@ class DashboardControllerTest extends AbstractTest {
         $toDate = '2013-01-01';
 
         $statisticsResponses = array(
-            StatisticsResponse::createModel(
+            StatisticsPerDayResponse::createModel(
                 OrderCountPerDay::withDbRow(array(
                     "purchase_date" => "2012-02-02", "order_count" => 1)
                 )
             ),
-            StatisticsResponse::createModel(
+            StatisticsPerDayResponse::createModel(
                 OrderCountPerDay::withDbRow(array(
                         "purchase_date" => "2012-02-04", "order_count" => 2)
                 )
             ),
-            StatisticsResponse::createModel(
+            StatisticsPerDayResponse::createModel(
                 OrderCountPerDay::withDbRow(array(
                         "purchase_date" => "2012-02-06", "order_count" => 3)
                 )
             )
         );
 
-        $this->statisticsService->method('getStatisticsBetweenDates')->willReturn($statisticsResponses);
+        $expectedResponse = StatisticsResponse::createModel(0,0,0, $statisticsResponses);
+
+        $this->statisticsService->method('getStatisticsBetweenDates')->willReturn($expectedResponse);
         $this->statisticsService->expects($this->once())
             ->method('getStatisticsBetweenDates')
             ->with($fromDate, $toDate);
 
         $result = $this->dashboardController->getStatisticsBetweenDates($fromDate, $toDate);
 
-        $this->assertEquals($statisticsResponses, $result);
+        $this->assertEquals($expectedResponse, $result);
     }
 
     /**
@@ -72,14 +76,16 @@ class DashboardControllerTest extends AbstractTest {
 
         $statisticsResponses = array();
 
-        $this->statisticsService->method('getStatisticsBetweenDates')->willReturn($statisticsResponses);
+        $expectedResponse = StatisticsResponse::createModel(0,0,0, $statisticsResponses);
+
+        $this->statisticsService->method('getStatisticsBetweenDates')->willReturn($expectedResponse);
         $this->statisticsService->expects($this->once())
             ->method('getStatisticsBetweenDates')
             ->with($fromDate, $toDate);
 
         $result = $this->dashboardController->getStatisticsBetweenDates($fromDate, $toDate);
 
-        $this->assertEquals($statisticsResponses, $result);
+        $this->assertEquals($expectedResponse, $result);
     }
 
     /**

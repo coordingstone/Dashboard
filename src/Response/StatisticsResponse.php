@@ -1,39 +1,35 @@
 <?php
 namespace Dashboard\Response;
 
-use Dashboard\Datamodels\OrderCountPerDay;
-
 class StatisticsResponse
 {
-    /**
-     * @var string
-     */
-    public string $purchaseDate;
+
+    /** @var int  */
+    public int $totalCountCustomers;
+
+    /** @var int  */
+    public int $totalCountOrders;
+
+    /** @var float  */
+    public float $totalRevenue;
+
+    /** @var StatisticsPerDayResponse[]  */
+    public array $statisticsPerDayResponses;
 
     /**
-     * @var int
-     */
-    public int $orderCount = 0;
-
-    /**
-     * @var float
-     */
-    public float $totalRevenue = 0;
-
-    /**
-     * @var int
-     */
-    public int $customerCount = 0;
-
-    /**
-     * @param OrderCountPerDay $orderCountPerDay
+     * @param int $totalCountCustomers
+     * @param int $totalCountOrders
+     * @param float $totalRevenue
+     * @param array $statisticsPerDayResponses
      * @return StatisticsResponse
      */
-    public static function createModel(OrderCountPerDay $orderCountPerDay): StatisticsResponse
+    public static function createModel(int $totalCountCustomers, int $totalCountOrders, float $totalRevenue, array $statisticsPerDayResponses): StatisticsResponse
     {
         $obj = new self();
-        $obj->purchaseDate = $orderCountPerDay->purchaseDate;
-        $obj->orderCount = $orderCountPerDay->orderCount ? $orderCountPerDay->orderCount : 0;
+        $obj->totalCountCustomers = $totalCountCustomers;
+        $obj->totalCountOrders = $totalCountOrders;
+        $obj->totalRevenue = $totalRevenue;
+        $obj->statisticsPerDayResponses = $statisticsPerDayResponses;
 
         return $obj;
     }

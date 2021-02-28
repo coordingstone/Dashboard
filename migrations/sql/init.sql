@@ -1,4 +1,3 @@
-CREATE DATABASE IF NOT EXISTS `dashboard`;
 CREATE TABLE IF NOT EXISTS `dashboard`.`order` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `customer_id` INT(10) UNSIGNED NOT NULL,

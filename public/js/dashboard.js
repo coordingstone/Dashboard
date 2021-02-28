@@ -42,24 +42,39 @@ function fetchData(fromDate, toDate) {
     let orders = [];
     let customers = [];
     let orderItems = [];
+    let totalCountCustomers = 0;
+    let totalCountOrders = 0;
+    let totalRevenue = 0;
+    let statisticsPerDayResponses;
     $.ajax({
         url: "/dashboard.php?fromDate=" + fromDate + "&toDate=" + toDate,
         type: "GET",
         success: function (result) {
-            labels = result.map(a => a.purchaseDate);
-            orders = result.map(a => a.orderCount);
-            customers = result.map(a => a.customerCount);
-            orderItems = result.map(a => a.totalRevenue);
+            totalCountCustomers = result["totalCountCustomers"];
+            totalCountOrders = result["totalCountOrders"];
+            totalRevenue = result["totalRevenue"];
+            statisticsPerDayResponses = result["statisticsPerDayResponses"];
+            labels = statisticsPerDayResponses.map(a => a.purchaseDate);
+            orders = statisticsPerDayResponses.map(a => a.orderCount);
+            customers = statisticsPerDayResponses.map(a => a.customerCount);
+            orderItems = statisticsPerDayResponses.map(a => a.totalRevenue);
 
+            addStatisticsTotal(totalCountCustomers, totalCountOrders, totalRevenue);
             addDataToChart(labels, orders, customers, orderItems);
 
         },
         error: function (xhr, status, error) {
-            let errorObject = JSON.parse(xhr);
-            let errorMessage =  errorObject["errorMessage"];
+            let responseJSON = xhr["responseJSON"];
+            let errorMessage = responseJSON["errorMessage"];
             message("error", errorMessage, "danger", '#fromDateLabel');
         }
     });
+}
+
+function addStatisticsTotal(totalCountCustomers, totalCountOrders, totalRevenue) {
+    $('#totalCustomersValue').text(totalCountCustomers);
+    $('#totalOrdersValue').text(totalCountOrders);
+    $('#totalRevenueValue').text(totalRevenue);
 }
 
 $('#submit').on('click', function () {
@@ -89,24 +104,24 @@ function addDataToChart(labels, orders, customers, orderItems) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Orders',
-                    data: orders,
-                    backgroundColor: 'rgba(255, 99, 132, 1)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                },
-                {
                     label: 'Customers',
                     data: customers,
-                    backgroundColor: 'rgba(33,220,16,0.5)',
-                    borderColor: 'rgba(33,220,16,0.5)',
+                    backgroundColor: 'rgba(240, 173, 78, 1)',
+                    borderColor: 'rgba(240, 173, 78, 1)',
                     borderWidth: 1
                 },
                 {
-                    label: 'Total Revenue',
+                    label: 'Orders',
+                    data: orders,
+                    backgroundColor: 'rgb(92, 184, 92)',
+                    borderColor: 'rgb(92, 184, 92)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Revenue',
                     data: orderItems,
-                    backgroundColor: 'rgba(24,117,146,0.5)',
-                    borderColor: 'rgba(24,117,146, 0.5)',
+                    backgroundColor: 'rgb(91, 192, 222)',
+                    borderColor: 'rgb(91, 192, 222)',
                     borderWidth: 1
                 }
             ]

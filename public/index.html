@@ -15,6 +15,20 @@
 <div class="container justify-content-center">
     <h1 class="display-3">Dashboard</h1>
     <div class="col-12">
+        <div class="row">
+            <div class="col-4">
+                <h3 id="totalCustomers" class="display-5 text-warning">Customers</h3>
+                <h5 id="totalCustomersValue" class="display-3 text-warning">0</h5>
+            </div>
+            <div class="col-4">
+                <h3 id="totalOrders" class="display-5 text-success">Orders</h3>
+                <h5 id="totalOrdersValue" class="display-3 text-success">0</h5>
+            </div>
+            <div class="col-4">
+                <h3 id="totalRevenue" class="display-5 text-info">Revenue</h3>
+                <h5 id="totalRevenueValue" class="display-3 text-info">0</h5>
+            </div>
+        </div>
         <div class="row" id="chartRow">
             <canvas id="myChart"></canvas>
         </div>
