@@ -28,10 +28,6 @@ The composer tool is installed in the docker container. To install composer pack
 Enter the docker container. In ``/var/www/html/migrations``, run migrations:
 
     $ php initDb.php
-    
-### Optional
-    
-Import ``migrations/sql/test/testdata.sql`` to populate the DB.
 
 ## Tests
 
